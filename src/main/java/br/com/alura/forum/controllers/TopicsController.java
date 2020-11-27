@@ -6,8 +6,12 @@ import br.com.alura.forum.models.Topic;
 import br.com.alura.forum.repositories.CoursesRepository;
 import br.com.alura.forum.repositories.TopicsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -33,8 +37,15 @@ public class TopicsController {
     }
 
     @PostMapping
-    public void insert(@RequestBody TopicForm form) {
+    public ResponseEntity<TopicDTO> insert(@RequestBody @Valid TopicForm form) {
         Topic topic = form.convert(coursesRepository);
         this.topicsRepository.save(topic);
+
+        return ResponseEntity
+                .created(ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .path("/")
+                    .path(topic.getId().toString()).build().toUri())
+                .body(new TopicDTO(topic));
     }
 }
