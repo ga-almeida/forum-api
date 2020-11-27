@@ -22,7 +22,7 @@ public class TopicDTO {
         this.dateCreated = topic.getDateCreated();
     }
 
-    public static List<TopicDTO> convete(List<Topic> topics) {
+    public static List<TopicDTO> convert(List<Topic> topics) {
         return topics.stream().map(TopicDTO::new).collect(Collectors.toList());
     }
 }
