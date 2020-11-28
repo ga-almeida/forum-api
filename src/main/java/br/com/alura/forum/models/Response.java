@@ -1,10 +1,13 @@
 package br.com.alura.forum.models;
 
+import lombok.Getter;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(name = "responses")
+@Getter
 public class Response {
 
     @Id
@@ -18,6 +21,7 @@ public class Response {
 
     @ManyToOne
     private User author;
+
     private Boolean solution = false;
 
     @Override

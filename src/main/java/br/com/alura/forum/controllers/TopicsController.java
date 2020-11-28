@@ -1,7 +1,9 @@
 package br.com.alura.forum.controllers;
 
+import br.com.alura.forum.controllers.dtos.DetailsTopicDTO;
 import br.com.alura.forum.controllers.dtos.TopicDTO;
 import br.com.alura.forum.controllers.forms.TopicForm;
+import br.com.alura.forum.controllers.forms.UpdatedTopicForm;
 import br.com.alura.forum.models.Topic;
 import br.com.alura.forum.repositories.CoursesRepository;
 import br.com.alura.forum.repositories.TopicsRepository;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -33,7 +36,6 @@ public class TopicsController {
             List<Topic> topics = this.topicsRepository.findByCourseName(nameCourse);
             return TopicDTO.convert(topics);
         }
-
     }
 
     @PostMapping
@@ -48,4 +50,19 @@ public class TopicsController {
                     .path(topic.getId().toString()).build().toUri())
                 .body(new TopicDTO(topic));
     }
+
+    @GetMapping("/{id}")
+    public DetailsTopicDTO details(@PathVariable Long id) {
+        Topic topic = this.topicsRepository.getOne(id);
+        return new DetailsTopicDTO(topic);
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<TopicDTO> update(@PathVariable Long id, @RequestBody @Valid UpdatedTopicForm form) {
+        Topic topic = form.update(id, this.topicsRepository);
+
+        return ResponseEntity.ok(new TopicDTO(topic));
+    }
+
 }
