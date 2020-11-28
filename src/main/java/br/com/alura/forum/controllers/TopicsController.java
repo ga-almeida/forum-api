@@ -11,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/topics")
@@ -45,31 +45,46 @@ public class TopicsController {
 
         return ResponseEntity
                 .created(ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/")
-                    .path(topic.getId().toString()).build().toUri())
+                        .fromCurrentRequest()
+                        .path("/")
+                        .path(topic.getId().toString()).build().toUri())
                 .body(new TopicDTO(topic));
     }
 
     @GetMapping("/{id}")
-    public DetailsTopicDTO details(@PathVariable Long id) {
-        Topic topic = this.topicsRepository.getOne(id);
-        return new DetailsTopicDTO(topic);
+    public ResponseEntity<DetailsTopicDTO> details(@PathVariable Long id) {
+        Optional<Topic> optional = this.topicsRepository.findById(id);
+
+        if (optional.isPresent()) {
+            return ResponseEntity.ok(new DetailsTopicDTO(optional.get()));
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<TopicDTO> update(@PathVariable Long id, @RequestBody @Valid UpdatedTopicForm form) {
-        Topic topic = form.update(id, this.topicsRepository);
+        Optional<Topic> optional = this.topicsRepository.findById(id);
 
-        return ResponseEntity.ok(new TopicDTO(topic));
+        if (optional.isPresent()) {
+            Topic topic = form.update(id, this.topicsRepository);
+            return ResponseEntity.ok(new TopicDTO(topic));
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        this.topicsRepository.deleteById(id);
+        Optional<Topic> optional = this.topicsRepository.findById(id);
 
-        return ResponseEntity.ok().build();
+        if (optional.isPresent()) {
+            this.topicsRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
 }
